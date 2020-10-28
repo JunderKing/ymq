@@ -12,6 +12,9 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::any('/', function() {
+    return date('Y-m-d H:i:s');
+});
 
 Route::group(['prefix' => 'user'], function() {
     // 不需要登录

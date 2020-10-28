@@ -104,6 +104,7 @@ class ActivityController extends Controller
                 'occupiedCount' => $activityObj->occupied_count,
                 'status' => $activityObj->status,
                 'statusText' => Models\Activity::getStatusText($activityObj),
+                'createTs' => strtotime($activityObj->created_at),
             ];
         }
 
