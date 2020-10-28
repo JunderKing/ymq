@@ -116,6 +116,7 @@ class ActivityController extends Controller
         $userCount = $this->param('userCount', 'nullable|int|min:1', 1);
         $activityId = $this->check('activityId', 'required|int|min:1');
         $curUserObj = Models\User::$curUserObj;
+
         // 是否已经报过
         $isExist = Models\Record::where([['activity_id', $activityId], ['user_id', $curUserObj->id]])->exists();
         if ($isExist) {

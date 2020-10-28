@@ -42,7 +42,7 @@ class AuthUtil
     }
 
     public static function setToken($userId) {
-        $token = str_random(12);
+        $token = \Redis::get("UserToken_$userId") ?: str_random(12);
         \Redis::setex("UserToken_$userId", 24 * 3600, $token);
         \Redis::setex("TokenUser_$token", 24 * 3600, $userId);
         \Cookie::queue('token', $token, 30 * 86400);
