@@ -16,7 +16,7 @@ class UserController extends Controller {
         $userObj = Models\User::updateOrCreate(['open_id' => $openId], [
             'avatar' => $avatar,
             'nickname' => $nickname,
-        ])->first();
+        ]);
         $token = null;
         if ($userObj) {
             $token = Utils\AuthUtil::setToken($userObj->id);
