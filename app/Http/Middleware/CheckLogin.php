@@ -11,7 +11,7 @@ class CheckLogin
         // 手机号登录
         $curUserId = Models\User::$curUserId;
         if (!$curUserId) {
-            throw new \ErrOut('', 302);
+            throw new \ErrOut('', 202);
         }
 
         return $next($request);
