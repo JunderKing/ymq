@@ -13,6 +13,17 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['prefix' => 'user'], function() {
+    // 不需要登录
+    Route::any('wxLogin', 'UserController@wxLogin');
 });
+
+Route::group(['prefix' => 'activity'], function () {
+    Route::any('list', 'ActivityController@list');
+    Route::any('detail', 'ActivityController@detail');
+    Route::group(['middleware' => 'checkLogin'], function() {
+        Route::any('join', 'ActivityController@join');
+        Route::any('create', 'ActivityController@create');
+    });
+});
+

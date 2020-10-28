@@ -227,6 +227,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
         'LogUtil' => \App\Utils\LogUtil::class,
+        'ErrOut' => \App\Exceptions\ErrOut::class,
     ],
 
 ];

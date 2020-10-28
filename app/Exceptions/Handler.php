@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
+use App\Utils\Alarm;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
@@ -36,7 +37,34 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $exception)
     {
-        parent::report($exception);
+        $notFound = strpos(get_class($exception), 'NotFoundHttpException') !== false;
+        if ($notFound) {
+            \LogUtil::info('NotFoundException =>', [
+                'class' => get_class($exception),
+                'path' => \Request::path(),
+                'param' => \Request::all(),
+                'ip' => \Request::ip(),
+                'url' => \URL::full(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'msg' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+            ], 'exception');
+        } else if (!$exception instanceof \ErrOut) {
+            \LogUtil::error('Exception =>', [
+                'class' => get_class($exception),
+                'path' => \Request::path(),
+                'param' => \Request::all(),
+                'ip' => \Request::ip(),
+                'url' => \URL::full(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'msg' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+            ], 'exception');
+        }
+
+        return parent::report($exception);
     }
 
     /**
