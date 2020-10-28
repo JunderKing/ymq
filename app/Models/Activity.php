@@ -12,8 +12,7 @@ class Activity extends Model
     // 1 进行中，2 已截止，3 已结束，4 已取消
     public static function getStatusText($activityObj) {
         $deadlineTs = strtotime($activityObj->deadline);
-        $startTs = strtotime($activityObj->startTime);
-        $endTs = strtotime($activityObj->endTime);
+        $endTs = strtotime($activityObj->end_time);
         $curTs = time();
         $statusText = '';
         if ($activityObj->status == 0) {
