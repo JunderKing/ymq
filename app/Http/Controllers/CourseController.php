@@ -93,7 +93,9 @@ class CourseController extends Controller
         // 查询课节列表
         $lessonColl = Models\Lesson::where('course_id', $courseObj->id)->orderBy('start_time', 'desc')->get();
         $lessonList = [];
+        $myNum = 0;
         foreach ($lessonColl as $lessonObj) {
+            in_array($lessonObj->id, $lessonIds) && $myNum++;
             $lessonList[] = [
                 'lessonId' => $lessonObj->id,
                 'startTs' => strtotime($lessonObj->start_time),
