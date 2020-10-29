@@ -21,12 +21,27 @@ Route::group(['prefix' => 'user'], function() {
     Route::any('wxLogin', 'UserController@wxLogin');
 });
 
-Route::group(['prefix' => 'activity'], function () {
-    Route::any('list', 'ActivityController@list');
-    Route::any('detail', 'ActivityController@detail');
+Route::group(['prefix' => 'course'], function () {
+    Route::any('list', 'CourseController@list');
+    Route::any('info', 'CourseController@info');
+    Route::any('detail', 'CourseController@detail');
     Route::group(['middleware' => 'checkLogin'], function() {
-        Route::any('join', 'ActivityController@join');
-        Route::any('create', 'ActivityController@create');
+        Route::any('createOrUpdate', 'CourseController@createOrUpdate');
     });
+});
+
+Route::group(['prefix' => 'lesson'], function () {
+    Route::any('detail', 'LessonController@detail');
+    Route::group(['middleware' => 'checkLogin'], function() {
+        Route::any('cancel', 'LessonController@cancel');
+        Route::any('join', 'LessonController@join');
+        Route::any('delete', 'LessonController@delete');
+        Route::any('createOrUpdate', 'LessonController@createOrUpdate');
+    });
+});
+
+Route::group(['prefix' => 'address'], function() {
+    Route::any('createOrUpdate', 'AddressController@createOrUpdate');
+    Route::any('list', 'AddressController@list');
 });
 

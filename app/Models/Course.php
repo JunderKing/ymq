@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Activity extends Model
+class Course extends Model
 {
-    protected $table = 'bmt_activity';
+    protected $table = 'bmt_course';
     protected $guarded = [];
 
     // 1 进行中，2 已截止，3 已结束，4 已取消
