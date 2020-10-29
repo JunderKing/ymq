@@ -107,7 +107,7 @@ class CourseController extends Controller
         }
 
         return $this->output([
-            'myNum' => $curUserObj ? count($lessonIds) : 0,
+            'myNum' => $myNum,
             'realName' => $curUserObj ? $curUserObj->real_name : '',
             'title' => $courseObj->title,
             'intro' => $courseObj->intro,
