@@ -36,7 +36,7 @@ class AdminController extends Controller
         $userDict = [];
         foreach ($userColl as $userObj) {
             $userCourseObj = @$userCourseDict[$userObj->id] ?: null;
-            $name = $userObj->realName ?: $userObj->nickname;
+            $name = $userObj->real_name ?: $userObj->nickname;
             $totalLesson = $userCourseObj ? $userCourseObj->total_lesson : 0;
             $usedLesson = $userCourseObj ? $userCourseObj->used_lesson : 0;
             $userData = [
