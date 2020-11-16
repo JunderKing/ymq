@@ -9,12 +9,14 @@ use App\Models;
 class UserController extends Controller {
     public function wxLogin() {
         $avatar = $this->param('avatar', 'required|string');
+        $realName = $this->param('realName', 'nullable', '');
         $nickname = $this->param('nickname', 'required|string');
         $code = $this->check('code', 'required|string');
         $rtnData = Utils\WxUtil::login($code);
         $openId = $rtnData['openId'];
         $userObj = Models\User::updateOrCreate(['open_id' => $openId], [
             'avatar' => $avatar,
+            'real_name' => $realName,
             'nickname' => $nickname,
         ]);
         $token = null;
@@ -24,9 +26,71 @@ class UserController extends Controller {
 
         return $this->output([
             'openId' => $rtnData['openId'],
+            'avatar' => $avatar,
+            'nickname' => $nickname,
+            'clubId' => $userObj->club_id,
             'token' => $token,
         ]);
     }
+
+    public function detail() {
+        $curUserObj = Models\User::$curUserObj;
+        $userData = null;
+        if ($curUserObj) {
+            $userCourseObj = Models\UserCourse::selectRaw('sum(total_lesson) as total_lesson, sum(used_lesson) as used_lesson')
+                ->where('user_id', $curUserObj->id)->first();
+            $totalLesson = $userCourseObj ? $userCourseObj->total_lesson : 0;
+            $usedLesson = $userCourseObj ? $userCourseObj->used_lesson : 0;
+            $userData = [
+                'nickname' => $curUserObj->nickname,
+                'avatar' => $curUserObj->avatar,
+                'clubId' => $curUserObj->club_id,
+                'totalLesson' => $totalLesson,
+                'usedLesson' => $usedLesson,
+                'trialStatus' => $curUserObj->trial_status,
+            ];
+        }
+
+        return $this->output(['userData' => $userData]);
+    }
+
+    public function lessonRecord() {
+        $curUserObj = Models\User::$curUserObj;
+        $recordColl = Models\Record::where('user_id', $curUserObj->id)->get();
+        $lessonIds = array_column($recordColl->toArray(), 'lesson_id');
+        $lessonColl = Models\Lesson::whereIn('id', $lessonIds)->get();
+        $lessonList = [];
+        // 查询地址信息
+        $addressColl = Models\Address::whereIn('id', array_column($lessonColl->toArray(), 'address_id'))->get();
+        $addressDict = [];
+        foreach ($addressColl as $addressObj) {
+            $addressDict[$addressObj->id] = $addressObj;
+        }
+        foreach ($lessonColl as $lessonObj) {
+            $addressObj = $addressDict[$lessonObj->address_id];
+            $lessonList[] = [
+                'lessonId' => $lessonObj->id,
+                'startTs' => strtotime($lessonObj->start_time),
+                'totalNum' => $lessonObj->total_num,
+                'takenNum' => $lessonObj->taken_num,
+                'status' => strtotime($lessonObj->start_time) > time() ? 1 : 0,
+                'joinStatus' => 1,
+                'addressData' => [
+                    'addressId' => $addressObj->id,
+                    'address' => $addressObj->address,
+                    'latitude' => $addressObj->latitude,
+                    'longitude' => $addressObj->longitude,
+                ]
+            ];
+        }
+
+        return $this->output([
+            'lessonList' => $lessonList
+        ]);
+    }
+
+
+    // ======================================================
 
     public function getTempToken() {
         $curUserId = Models\User::$curUserId;

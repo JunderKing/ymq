@@ -8,40 +8,6 @@ use App\Utils;
 
 class LessonController extends Controller
 {
-    public function createOrUpdate()
-    {
-        $courseId = $this->param('courseId', 'required|int|min:1');
-        $lessonId = $this->param('lessonId', 'nullable|int', 0);
-        $startTime = $this->param('startTime', 'required');
-        $duration = $this->param('duration', 'required');
-        $totalNum = $this->param('totalNum', 'required|int|min:1');
-        $addressId = $this->check('addressId', 'required|int|min:1');
-
-
-        if ($lessonId > 0) {
-            // 更新课程
-            Models\Lesson::where('id', $lessonId)->update([
-                'course_id' => $courseId,
-                'start_time' => $startTime,
-                'duration' => $duration,
-                'total_num' => $totalNum,
-                'address_id' => $addressId,
-            ]);
-        } else {
-            // 新建课程
-            $lessonObj = Models\Lesson::create([
-                'course_id' => $courseId,
-                'start_time' => $startTime,
-                'duration' => $duration,
-                'total_num' => $totalNum,
-                'address_id' => $addressId,
-            ]);
-            $lessonId = $lessonObj->id;
-        }
-
-        return $this->output(['lessonId' => $lessonId]);
-    }
-
     public function detail()
     {
         $lessonId = $this->check('lessonId', 'required|int|min:1');
@@ -94,11 +60,32 @@ class LessonController extends Controller
     {
         $lessonId = $this->check('lessonId', 'required|int|min:1');
         $curUserObj = Models\User::$curUserObj;
-        \DB::beginTransaction();
-        $flag = Models\Lesson::where([['id', $lessonId], ['taken_num', '>', 0]])->decrement('taken_num', 1);
-        if ($flag) {
-            Models\Record::where([['lesson_id', $lessonId], ['user_id', $curUserObj->id]])->delete();
+        $recordObj = Models\Record::where([['lesson_id', $lessonId], ['user_id', $curUserObj->id]])->firstOrFail();
+        $lessonObj = Models\Lesson::findOrFail($lessonId);
+
+        // 开课前一小时不可取消
+        $startTs = strtotime($lessonObj->start_time);
+        if ($startTs - time() <= 3600) {
+            return $this->error(306);
         }
+
+        \DB::beginTransaction();
+        if ($recordObj->is_trial) {
+            $flag = Models\User::where([['id', $curUserObj->id], ['trial_status', 1]])->update(['trial_status' => 0]);
+        } else {
+            $flag = Models\UserCourse::where([['user_id', $curUserObj->id], ['course_id', $lessonObj->course_id], ['used_lesson', '>', 0]])
+                ->decrement('used_lesson', 1);
+        }
+        if (!$flag) {
+            \DB::rollback();
+            return $this->error();
+        }
+        $flag = Models\Lesson::where([['id', $lessonId], ['taken_num', '>', 0]])->decrement('taken_num', 1);
+        if (!$flag) {
+            \DB::rollback();
+            return $this->error();
+        }
+        Models\Record::where([['lesson_id', $lessonId], ['user_id', $curUserObj->id]])->delete();
         \DB::commit();
 
         return $this->output();
@@ -107,33 +94,56 @@ class LessonController extends Controller
     // 1 报名成功 0 取消报名
     public function join()
     {
-        $realName = $this->param('realName', 'nullable', null);
         $lessonId = $this->check('lessonId', 'required|int|min:1');
         $curUserObj = Models\User::$curUserObj;
+        $lessonObj = Models\Lesson::findOrFail($lessonId);
 
-        if (!$curUserObj->realName && $realName) {
-            Models\User::where('id', $curUserObj->id)->update(['real_name' => $realName]);
+        $startTs = strtotime($lessonObj->start_time);
+        if ($startTs <= time()) {
+            return $this->error(305);
         }
+
+        $userCourseObj = Models\UserCourse::where([['user_id', $curUserObj->id], ['course_id', $lessonObj->course_id]])->first();
+        $remainLesson = $userCourseObj ? $userCourseObj->total_lesson - $userCourseObj->used_lesson : 0;
+        if ($curUserObj->trial_status && $remainLesson <= 0) {
+            return $this->error(203);
+        }
+
         // 是否已经报过
         $isExist = Models\Record::where([['lesson_id', $lessonId], ['user_id', $curUserObj->id]])->exists();
         if ($isExist) {
             return $this->error(301);
         }
         // 是否还有剩余的位置
-        $lessonObj = Models\Lesson::findOrFail($lessonId);
         if ($lessonObj->total_num <= $lessonObj->taken_num) {
             return $this->error(302);
         }
 
         \DB::beginTransaction();
+        // 扣除用户课时
+        $isTrial = 0;
+        if ($remainLesson > 0) {
+            $flag = Models\UserCourse::where([['id', $userCourseObj->id]])->whereRaw('total_lesson > used_lesson')
+                ->increment('used_lesson', 1);
+        } else {
+            $flag = Models\User::where([['id', $curUserObj->d], ['trial_status', 0]])->update(['trial_status' => 1]);
+            $isTrial = 1;
+        }
+        if (!$flag) {
+            \DB::rollback();
+            return $this->error(203);
+        }
+        // 更改上课人次
         $flag = Models\Lesson::where([['id', $lessonId]])->whereRaw('total_num > taken_num')
             ->increment('taken_num', 1);
         if (!$flag) {
+            \DB::rollback();
             return $this->error(103);
         }
         Models\Record::create([
             'lesson_id' => $lessonId,
             'user_id' => $curUserObj->id,
+            'is_trial' => $isTrial,
             'status' => 1,
         ]);
         \DB::commit();

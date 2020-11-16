@@ -18,7 +18,7 @@ class AuthUtil
         // 获取缓存userId
         $userId = \Redis::get("TokenUser_$token");
         if ($userId > 0) {
-            $userObj = Models\User::findOrFail($userId);
+            $userObj = Models\User::find($userId);
             if ($userObj) {
                 Models\User::$curUserObj = $userObj;
                 Models\User::$curUserId = $userObj->id;
