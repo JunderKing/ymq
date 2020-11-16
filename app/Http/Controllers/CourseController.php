@@ -46,7 +46,7 @@ class CourseController extends Controller
         $courseId = $this->check('courseId', 'required|int|min:1');
         $curUserObj = Models\User::$curUserObj;
         // 查询自己报名的课程
-        $userCourseObj = Models\UserCourse::where([['user_id', $curUserObj->id], ['course_id', $courseId]])->first();
+        $userCourseObj = $curUserObj ? Models\UserCourse::where([['user_id', $curUserObj->id], ['course_id', $courseId]])->first() : null;
         $myTotalLesson = $userCourseObj ? $userCourseObj->total_lesson : 0;
         $myUsedLesson = $userCourseObj ? $userCourseObj->used_lesson : 0;
         if ($myTotalLesson == 0 && $curUserObj->trial_status == 0) {
