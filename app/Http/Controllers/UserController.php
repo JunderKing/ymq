@@ -39,8 +39,8 @@ class UserController extends Controller {
         if ($curUserObj) {
             $userCourseObj = Models\UserCourse::selectRaw('sum(total_lesson) as total_lesson, sum(used_lesson) as used_lesson')
                 ->where('user_id', $curUserObj->id)->first();
-            $totalLesson = $userCourseObj ? $userCourseObj->total_lesson : 0;
-            $usedLesson = $userCourseObj ? $userCourseObj->used_lesson : 0;
+            $totalLesson = @$userCourseObj->total_lesson ?: 0;
+            $usedLesson = @$userCourseObj->used_lesson ?: 0;
             $userData = [
                 'nickname' => $curUserObj->nickname,
                 'avatar' => $curUserObj->avatar,
