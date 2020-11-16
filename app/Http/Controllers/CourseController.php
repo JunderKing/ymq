@@ -22,7 +22,7 @@ class CourseController extends Controller
         $courseList = [];
         foreach ($courseColl as $courseObj) {
             $courseLessonData = @$courseLessonDict[$courseObj->id];
-            if (!$courseLessonData || $courseLessonData['pendingLesson'] <= 0) {
+            if (!$courseLessonData) {
                 continue;
             }
             $clubObj = $clubDict[$courseObj->club_id];
