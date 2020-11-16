@@ -49,7 +49,7 @@ class CourseController extends Controller
         $userCourseObj = $curUserObj ? Models\UserCourse::where([['user_id', $curUserObj->id], ['course_id', $courseId]])->first() : null;
         $myTotalLesson = $userCourseObj ? $userCourseObj->total_lesson : 0;
         $myUsedLesson = $userCourseObj ? $userCourseObj->used_lesson : 0;
-        if ($myTotalLesson == 0 && $curUserObj->trial_status == 0) {
+        if ($myTotalLesson == 0 && $curUserObj && $curUserObj->trial_status == 0) {
             $myTotalLesson++;
         }
         $lessonIds = $curUserObj ? Models\Record::where('user_id', $curUserObj->id)->pluck('lesson_id')->toArray() : [];
