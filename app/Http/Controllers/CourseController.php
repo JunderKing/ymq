@@ -25,7 +25,7 @@ class CourseController extends Controller
             $clubObj = $clubDict[$courseObj->club_id];
             $courseList[] = [
                 'courseId' => $courseObj->id,
-                'logo' => $clubObj->log,
+                'logo' => $clubObj->logo,
                 'name' => $clubObj->name,
                 'title' => $courseObj->title,
                 'intro' => $courseObj->intro,
