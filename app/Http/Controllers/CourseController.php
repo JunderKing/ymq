@@ -22,6 +22,9 @@ class CourseController extends Controller
         $courseList = [];
         foreach ($courseColl as $courseObj) {
             $courseLessonData = @$courseLessonDict[$courseObj->id];
+            if (!$courseLessonData || $courseLessonData['pendingLesson'] <= 0) {
+                continue;
+            }
             $clubObj = $clubDict[$courseObj->club_id];
             $courseList[] = [
                 'courseId' => $courseObj->id,
