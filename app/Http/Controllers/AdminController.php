@@ -87,6 +87,7 @@ class AdminController extends Controller
 
         return $this->output();
     }
+
     // 课程管理
     public function courseList() {
         $curUserObj = Models\User::$curUserObj;
