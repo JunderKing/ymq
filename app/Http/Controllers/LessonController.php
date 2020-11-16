@@ -131,7 +131,7 @@ class LessonController extends Controller
         }
         if (!$flag) {
             \DB::rollback();
-            return $this->error(203);
+            return $this->error(103);
         }
         // 更改上课人次
         $flag = Models\Lesson::where([['id', $lessonId]])->whereRaw('total_num > taken_num')
