@@ -112,15 +112,15 @@ class CourseController extends Controller
         }
         $courseList = [];
         foreach ($courseColl as $courseObj) {
-            $courseLessonData = $courseLessonDict[$courseObj->id];
+            $courseLessonData = @$courseLessonDict[$courseObj->id];
             $userObj = $userDict[$courseObj->user_id];
             $courseList[] = [
                 'courseId' => $courseObj->id,
                 'avatar' => $userObj->avatar,
                 'title' => $courseObj->title,
                 'intro' => $courseObj->intro,
-                'totalLesson' => $courseLessonData['totalLesson'],
-                'pendingLesson' => $courseLessonData['pendingLesson'],
+                'totalLesson' => @$courseLessonData['totalLesson'] ?: 0,
+                'pendingLesson' => @$courseLessonData['pendingLesson'] ?: 0,
                 'statusText' => '报名中',
                 'createTs' => strtotime($courseObj->created_at),
             ];

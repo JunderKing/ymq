@@ -7,7 +7,7 @@ use App\Models;
 
 class AddressController extends Controller
 {
-    public function createOrUpdate() {
+    public function update() {
         $addressId = $this->param('addressId', 'nullable|int', null);
         $address = $this->param('address', 'required|string');
         $latitude = $this->param('latitude', 'required|numeric');
