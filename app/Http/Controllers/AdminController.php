@@ -46,6 +46,7 @@ class AdminController extends Controller
                 'nickname' => $userObj->nickname,
                 'realName' => $userObj->real_name,
                 'totalLesson' => $totalLesson,
+                'usedLesson' => $usedLesson,
                 'remainLesson' => $totalLesson - $usedLesson,
             ];
             $letter = Utils\BaseUtil::getFirstChar($name);
