@@ -126,7 +126,7 @@ class LessonController extends Controller
             $flag = Models\UserCourse::where([['id', $userCourseObj->id]])->whereRaw('total_lesson > used_lesson')
                 ->increment('used_lesson', 1);
         } else {
-            $flag = Models\User::where([['id', $curUserObj->d], ['trial_status', 0]])->update(['trial_status' => 1]);
+            $flag = Models\User::where([['id', $curUserObj->id], ['trial_status', 0]])->update(['trial_status' => 1]);
             $isTrial = 1;
         }
         if (!$flag) {
